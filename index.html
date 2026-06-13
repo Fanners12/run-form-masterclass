@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Run Form Masterclass</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#1A1D21">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --track:#1A1D21;
+    --track2:#23272d;
+    --chalk:#F2F0EB;
+    --chalk-dim:#9B9D9F;
+    --red:#D7402A;
+    --green:#5FE3A1;
+    --amber:#E8B84B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--track);
+    color:var(--chalk);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Lane-line signature backdrop */
+  .lanes{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      repeating-linear-gradient(90deg,
+        transparent 0, transparent 23px,
+        rgba(242,240,235,0.035) 23px, rgba(242,240,235,0.035) 25px,
+        transparent 25px, transparent 100px);
+  }
+  .wrap{position:relative; z-index:1; max-width:760px; margin:0 auto; padding:0 0 60px;}
+
+  header{
+    padding:28px 20px 22px;
+    border-bottom:2px solid var(--red);
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'Oswald',sans-serif;
+    font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--red); font-weight:600; margin-bottom:6px;
+  }
+  h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700; font-size:30px; letter-spacing:.01em;
+    text-transform:uppercase; line-height:1.05;
+  }
+  h1 span{color:var(--chalk-dim); font-weight:400;}
+  .sub{color:var(--chalk-dim); font-size:13px; margin-top:8px; max-width:480px; line-height:1.5;}
+
+  section{padding:22px 20px;}
+  .section-title{
+    font-family:'Oswald',sans-serif; font-weight:600; font-size:13px;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--chalk-dim);
+    margin-bottom:14px; display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after{content:''; flex:1; height:1px; background:rgba(242,240,235,0.12);}
+
+  /* Upload zone */
+  .dropzone{
+    border:2px dashed rgba(242,240,235,0.25);
+    border-radius:4px;
+    padding:36px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .2s, background .2s;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--red);
+    background:rgba(215,64,42,0.06);
+  }
+  .dropzone strong{font-family:'Oswald',sans-serif; font-size:16px; letter-spacing:.04em; text-transform:uppercase;}
+  .dropzone p{font-size:12px; color:var(--chalk-dim); margin-top:6px;}
+  input[type=file]{display:none;}
+
+  /* Video + filmstrip */
+  .video-frame{
+    position:relative; background:#000; border-radius:4px; overflow:hidden;
+    border:1px solid rgba(242,240,235,0.1);
+  }
+  video{width:100%; display:block; max-height:420px; background:#000;}
+
+  .overlay-grid{
+    position:absolute; inset:0; pointer-events:none; opacity:.35;
+  }
+  .overlay-grid.on{display:block;} .overlay-grid.off{display:none;}
+  .overlay-grid svg{width:100%; height:100%;}
+
+  .scrub-row{display:flex; align-items:center; gap:10px; margin-top:12px;}
+  .scrub-row input[type=range]{flex:1; accent-color:var(--red); height:4px;}
+  .frame-readout{
+    font-family:'Oswald',sans-serif; font-size:12px; color:var(--chalk-dim);
+    letter-spacing:.05em; min-width:84px; text-align:right;
+  }
+  .filmstrip-controls{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .btn{
+    font-family:'Oswald',sans-serif; font-weight:600; font-size:12px;
+    letter-spacing:.12em; text-transform:uppercase;
+    background:var(--track2); color:var(--chalk);
+    border:1px solid rgba(242,240,235,0.15);
+    padding:9px 14px; border-radius:3px; cursor:pointer;
+    transition:border-color .15s, color .15s;
+  }
+  .btn:hover{border-color:var(--chalk-dim);}
+  .btn.active{border-color:var(--green); color:var(--green);}
+  .btn.primary{background:var(--red); border-color:var(--red); color:var(--chalk);}
+  .btn.primary:hover{background:#c2381f;}
+  .btn:disabled{opacity:.35; cursor:not-allowed;}
+
+  /* Checkpoint cards */
+  .checkpoints{display:flex; flex-direction:column; gap:10px;}
+  .checkpoint{
+    background:var(--track2); border:1px solid rgba(242,240,235,0.08);
+    border-radius:4px; padding:14px 16px;
+    border-left:3px solid rgba(242,240,235,0.15);
+  }
+  .checkpoint.flagged{border-left-color:var(--amber);}
+  .checkpoint-head{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .checkpoint-name{font-family:'Oswald',sans-serif; font-weight:600; font-size:14px; letter-spacing:.04em;}
+  .checkpoint-frame{font-size:11px; color:var(--chalk-dim); font-family:'Oswald',sans-serif; letter-spacing:.08em;}
+  .checkpoint-desc{font-size:12px; color:var(--chalk-dim); margin:6px 0 10px; line-height:1.5;}
+  .rating-row{display:flex; gap:6px;}
+  .rating-row button{
+    flex:1; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; padding:8px 4px; border-radius:3px; cursor:pointer;
+    border:1px solid rgba(242,240,235,0.15); background:transparent; color:var(--chalk-dim);
+    transition:all .15s;
+  }
+  .rating-row button.sel-good{background:rgba(95,227,161,0.15); border-color:var(--green); color:var(--green);}
+  .rating-row button.sel-bad{background:rgba(231,184,75,0.15); border-color:var(--amber); color:var(--amber);}
+  .rating-row button:not(.sel-good):not(.sel-bad):hover{border-color:var(--chalk-dim); color:var(--chalk);}
+
+  textarea.note{
+    width:100%; margin-top:8px; background:rgba(0,0,0,0.25);
+    border:1px solid rgba(242,240,235,0.1); border-radius:3px;
+    color:var(--chalk); font-family:'Inter',sans-serif; font-size:12px;
+    padding:8px; min-height:46px; resize:vertical;
+  }
+  textarea.note::placeholder{color:rgba(155,157,159,0.6);}
+
+  /* Report */
+  .report{
+    background:var(--track2); border-radius:4px; padding:18px;
+    border:1px solid rgba(242,240,235,0.08);
+  }
+  .report h3{
+    font-family:'Oswald',sans-serif; font-size:13px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--chalk-dim); margin-bottom:8px;
+  }
+  .report-block{margin-bottom:16px;}
+  .report-block:last-child{margin-bottom:0;}
+  .priority-item{
+    display:flex; gap:10px; padding:10px 0;
+    border-bottom:1px solid rgba(242,240,235,0.06);
+    font-size:13px; line-height:1.5;
+  }
+  .priority-item:last-child{border-bottom:none;}
+  .priority-num{
+    font-family:'Oswald',sans-serif; font-weight:700; color:var(--red);
+    font-size:16px; min-width:22px;
+  }
+  .empty-note{color:var(--chalk-dim); font-size:12px; font-style:italic;}
+
+  .linked-drills{margin-top:8px; display:flex; flex-direction:column; gap:6px;}
+  .drill-tag{
+    background:rgba(95,227,161,0.06);
+    border:1px solid rgba(95,227,161,0.2);
+    border-radius:3px; padding:8px 10px;
+    font-size:11px; line-height:1.5;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .drill-name{
+    font-family:'Oswald',sans-serif; font-weight:600; letter-spacing:.06em;
+    color:var(--green); text-transform:uppercase; font-size:11px;
+  }
+  .drill-app{color:var(--chalk-dim); font-size:10px; letter-spacing:.04em;}
+  .drill-note{color:var(--chalk); font-size:11px;}
+
+  footer{
+    text-align:center; padding:30px 20px 10px; color:var(--chalk-dim);
+    font-size:11px; letter-spacing:.08em;
+  }
+  footer .eyebrow{margin-bottom:4px;}
+
+  @media (max-width:480px){
+    h1{font-size:24px;}
+    .rating-row{flex-wrap:wrap;}
+    .rating-row button{flex:1 1 30%;}
+  }
+</style>
+</head>
+<body>
+<div class="lanes"></div>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Run Form Masterclass</div>
+    <h1>Frame-by-Frame <span>Gait Review</span></h1>
+    <p class="sub">Upload a side-on video of a run or sprint. Step through it frame-by-frame, score each coaching checkpoint, and get a prioritised correction plan to work on next session.</p>
+  </header>
+
+  <section id="upload-section">
+    <div class="section-title">01 — Load Footage</div>
+    <div class="dropzone" id="dropzone">
+      <strong>Tap to upload video</strong>
+      <p>Side-on view works best · MP4/MOV · stays on this device</p>
+      <input type="file" id="fileInput" accept="video/*">
+    </div>
+  </section>
+
+  <section id="video-section" style="display:none;">
+    <div class="section-title">02 — Step Through</div>
+    <div class="video-frame">
+      <video id="video" playsinline muted></video>
+      <div class="overlay-grid off" id="overlayGrid">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+          <line x1="50" y1="0" x2="50" y2="100" stroke="#D7402A" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="0" y1="75" x2="100" y2="75" stroke="#5FE3A1" stroke-width="0.3" stroke-dasharray="2,2"/>
+          <line x1="0" y1="50" x2="100" y2="50" stroke="#F2F0EB" stroke-width="0.2" stroke-dasharray="1,3"/>
+        </svg>
+      </div>
+    </div>
+    <div class="scrub-row">
+      <input type="range" id="scrub" min="0" max="100" value="0" step="0.1">
+      <div class="frame-readout" id="timeReadout">0.00s</div>
+    </div>
+    <div class="filmstrip-controls">
+      <button class="btn" id="stepBack">◀ −0.1s</button>
+      <button class="btn" id="playPause">▶ Play</button>
+      <button class="btn" id="stepFwd">+0.1s ▶</button>
+      <button class="btn" id="toggleGrid">Grid: Off</button>
+      <button class="btn" id="toggleSlow">Speed: 1x</button>
+    </div>
+  </section>
+
+  <section id="checklist-section" style="display:none;">
+    <div class="section-title">03 — Score Checkpoints</div>
+    <div class="checkpoints" id="checkpoints"></div>
+  </section>
+
+  <section id="report-section" style="display:none;">
+    <div class="section-title">04 — Correction Plan</div>
+    <div class="report" id="report"></div>
+    <div class="filmstrip-controls" style="margin-top:14px;">
+      <button class="btn primary" id="generateReport">Generate Plan</button>
+      <button class="btn" id="resetAll">Reset</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="eyebrow">Run Form Masterclass</div>
+    Built for sideline use · No video leaves your device
+  </footer>
+</div>
+
+<script>
+const checkpointData = [
+  {
+    id:'posture',
+    name:'Posture & Lean',
+    desc:'At top speed, look for a slight forward lean from the ankles (not the waist) and a tall, relaxed torso — not hunched or backward-leaning.',
+    good:'Tall posture, slight forward lean from ankles, relaxed shoulders.',
+    bad:{
+      title:'Posture breakdown',
+      fix:'Cue "tall chest, lean from the ankles." Drill: wall drills — lean into a wall with a straight line from ankle to head, then march/run away from the wall maintaining that line.'
+    },
+    linkedDrills:[
+      {name:'Wall Drill — Posture Lean', app:'Explosive Striker, Session 1 (Acceleration)', note:'Wall march/run drill for ankle-to-head lean.'},
+      {name:'A-Skip Posture Marches', app:'Explosive Striker, Session 3 (Strength & Mechanics)', note:'Tall posture cue carries over from skips into strides.'}
+    ]
+  },
+  {
+    id:'armdrive',
+    name:'Arm Drive',
+    desc:'Arms should drive front-to-back from the shoulder, roughly 90° elbow bend, hands moving hip-to-cheek — not crossing the body or flailing wide.',
+    good:'Compact 90° arm swing, front-to-back, hands hip-to-cheek.',
+    bad:{
+      title:'Inefficient arm action',
+      fix:'Cue "hip pocket to cheekbone, elbows stay back." Drill: seated or standing arm-swing drills in front of a mirror for 3x20s, focusing on a straight front-to-back path.'
+    },
+    linkedDrills:[
+      {name:'Standing Arm Swings', app:'Explosive Striker, Session 2 (Reaction & Speed)', note:'Mirror drill for compact front-to-back arm path.'},
+      {name:'Mini Band Arm Coordination', app:'Mini Band Speed & Power Workout', note:'Reinforces arm-leg timing under resistance.'}
+    ]
+  },
+  {
+    id:'kneedrive',
+    name:'Knee Drive (Front Side)',
+    desc:'The lead knee should drive forward and up with the thigh reaching roughly parallel to the ground during max speed, foot staying under or slightly ahead of the hip.',
+    good:'Strong knee lift, thigh near-parallel, foot recovers under the hip.',
+    bad:{
+      title:'Low / lazy knee drive',
+      fix:'Cue "drive the knee, not the foot." Drill: A-skips and high-knee marches (3x20m) focusing on a punchy knee drive with minimal ground contact time.'
+    },
+    linkedDrills:[
+      {name:'A-Skips & High Knee March', app:'Explosive Striker, Session 3 (Strength & Mechanics)', note:'Core drill for knee drive height and timing.'},
+      {name:'Acceleration Drive Phase', app:'Explosive Striker, Session 1 (Acceleration)', note:'Knee drive under forward lean from a standing start.'}
+    ]
+  },
+  {
+    id:'footstrike',
+    name:'Foot Strike & Ground Contact',
+    desc:'Foot should land under the hip on the ball of the foot/midfoot with a quick "stiff spring" contact — not a long overstride heel-strike out in front of the body.',
+    good:'Midfoot strike under the hip, short ground contact, springy rebound.',
+    bad:{
+      title:'Overstriding / heel strike',
+      fix:'Cue "land under your hips, paw the ground back." Drill: quick-step / fast-feet drills over 10m, focusing on shorter, faster contacts rather than longer strides.'
+    },
+    linkedDrills:[
+      {name:'Fast Feet / Quick Step Ladder', app:'Explosive Striker, Session 2 (Reaction & Speed)', note:'Builds shorter, quicker ground contacts.'},
+      {name:'Sprint Drill Module — Drill 1', app:'Sprint Drill Module', note:'Foot strike under hip emphasis, low-intensity reps.'}
+    ]
+  },
+  {
+    id:'cadence',
+    name:'Stride Rhythm & Cadence',
+    desc:'Watch for an even, rhythmic stride pattern with consistent ground contact time on both sides — no noticeable hitch, hop, or asymmetry between legs.',
+    good:'Even rhythm, symmetrical stride length and contact time both sides.',
+    bad:{
+      title:'Asymmetric / uneven rhythm',
+      fix:'Note which side looks shorter or heavier — this often points to a mobility or strength imbalance worth a closer look (hip flexor, ankle, or single-leg strength). Drill: single-leg balance and single-leg hops to compare sides, plus metronome-paced strides to even out rhythm.'
+    },
+    linkedDrills:[
+      {name:'Single-Leg Hops & Balance', app:'Explosive Striker, Session 3 (Strength & Mechanics)', note:'Compares left/right strength and control.'},
+      {name:'Mini Band Single-Leg Work', app:'Mini Band Speed & Power Workout', note:'Targets side-to-side strength imbalances.'}
+    ]
+  },
+  {
+    id:'headstability',
+    name:'Head & Gaze Stability',
+    desc:'Head should stay level and stable, eyes looking ahead toward the horizon — not bobbing, tilting back, or looking down at the feet.',
+    good:'Level, stable head position, eyes on the horizon.',
+    bad:{
+      title:'Head bobbing / looking down',
+      fix:'Cue "eyes up, fix a point on the horizon." This is often a side-effect of poor posture or fatigue — revisit after addressing posture and breathing.'
+    },
+    linkedDrills:[
+      {name:'Posture Wall Drill', app:'Explosive Striker, Session 1 (Acceleration)', note:'Head position often resolves once posture is fixed — recheck this checkpoint after working on Posture & Lean.'}
+    ]
+  }
+];
+
+let videoFile = null;
+let videoURL = null;
+const ratings = {};
+const notes = {};
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const video = document.getElementById('video');
+const scrub = document.getElementById('scrub');
+const timeReadout = document.getElementById('timeReadout');
+const playPauseBtn = document.getElementById('playPause');
+const toggleGridBtn = document.getElementById('toggleGrid');
+const overlayGrid = document.getElementById('overlayGrid');
+const toggleSlowBtn = document.getElementById('toggleSlow');
+const checkpointsEl = document.getElementById('checkpoints');
+const reportEl = document.getElementById('report');
+
+dropzone.addEventListener('click', () => fileInput.click());
+['dragover','dragleave','drop'].forEach(evt=>{
+  dropzone.addEventListener(evt, e=>{
+    e.preventDefault();
+    if(evt==='dragover') dropzone.classList.add('drag');
+    else dropzone.classList.remove('drag');
+  });
+});
+dropzone.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f) loadVideo(f);
+});
+fileInput.addEventListener('change', e=>{
+  if(e.target.files[0]) loadVideo(e.target.files[0]);
+});
+
+function loadVideo(file){
+  videoFile = file;
+  if(videoURL) URL.revokeObjectURL(videoURL);
+  videoURL = URL.createObjectURL(file);
+  video.src = videoURL;
+  document.getElementById('video-section').style.display='block';
+  document.getElementById('checklist-section').style.display='block';
+  document.getElementById('report-section').style.display='block';
+  buildCheckpoints();
+  video.addEventListener('loadedmetadata', ()=>{
+    scrub.max = video.duration;
+    scrub.step = 1/30; // approx single frame at 30fps
+    updateReadout();
+  }, {once:true});
+  document.getElementById('video-section').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+video.addEventListener('timeupdate', ()=>{
+  scrub.value = video.currentTime;
+  updateReadout();
+});
+
+scrub.addEventListener('input', ()=>{
+  video.currentTime = parseFloat(scrub.value);
+  if(!video.paused) video.pause();
+  updateReadout();
+});
+
+function updateReadout(){
+  timeReadout.textContent = video.currentTime.toFixed(2) + 's';
+}
+
+document.getElementById('stepBack').addEventListener('click', ()=>{
+  video.pause();
+  video.currentTime = Math.max(0, video.currentTime - 1/30);
+  updateReadout();
+});
+document.getElementById('stepFwd').addEventListener('click', ()=>{
+  video.pause();
+  video.currentTime = Math.min(video.duration, video.currentTime + 1/30);
+  updateReadout();
+});
+
+playPauseBtn.addEventListener('click', ()=>{
+  if(video.paused){ video.play(); playPauseBtn.textContent='⏸ Pause'; }
+  else { video.pause(); playPauseBtn.textContent='▶ Play'; }
+});
+video.addEventListener('ended', ()=>{ playPauseBtn.textContent='▶ Play'; });
+video.addEventListener('pause', ()=>{ playPauseBtn.textContent='▶ Play'; });
+video.addEventListener('play', ()=>{ playPauseBtn.textContent='⏸ Pause'; });
+
+toggleGridBtn.addEventListener('click', ()=>{
+  const on = overlayGrid.classList.toggle('on');
+  overlayGrid.classList.toggle('off', !on);
+  toggleGridBtn.textContent = 'Grid: ' + (on?'On':'Off');
+  toggleGridBtn.classList.toggle('active', on);
+});
+
+let slow = false;
+toggleSlowBtn.addEventListener('click', ()=>{
+  slow = !slow;
+  video.playbackRate = slow ? 0.25 : 1;
+  toggleSlowBtn.textContent = 'Speed: ' + (slow?'0.25x':'1x');
+  toggleSlowBtn.classList.toggle('active', slow);
+});
+
+function buildCheckpoints(){
+  checkpointsEl.innerHTML = '';
+  checkpointData.forEach(cp=>{
+    const card = document.createElement('div');
+    card.className = 'checkpoint';
+    card.id = 'cp-'+cp.id;
+    card.innerHTML = `
+      <div class="checkpoint-head">
+        <div class="checkpoint-name">${cp.name}</div>
+        <div class="checkpoint-frame" id="frame-${cp.id}"></div>
+      </div>
+      <div class="checkpoint-desc">${cp.desc}</div>
+      <div class="rating-row">
+        <button data-rate="good" data-cp="${cp.id}">Looks Good</button>
+        <button data-rate="bad" data-cp="${cp.id}">Needs Work</button>
+        <button class="markFrame" data-cp="${cp.id}">Mark Frame</button>
+      </div>
+      <textarea class="note" data-cp="${cp.id}" placeholder="Optional note about what you saw at this point..."></textarea>
+    `;
+    checkpointsEl.appendChild(card);
+  });
+
+  checkpointsEl.querySelectorAll('[data-rate]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cp = btn.dataset.cp;
+      const rate = btn.dataset.rate;
+      ratings[cp] = (ratings[cp] === rate) ? null : rate;
+      const card = document.getElementById('cp-'+cp);
+      card.classList.toggle('flagged', ratings[cp]==='bad');
+      const row = card.querySelector('.rating-row');
+      row.querySelectorAll('[data-rate]').forEach(b=>{
+        b.classList.remove('sel-good','sel-bad');
+        if(ratings[cp] && b.dataset.rate===ratings[cp]){
+          b.classList.add(ratings[cp]==='good'?'sel-good':'sel-bad');
+        }
+      });
+    });
+  });
+
+  checkpointsEl.querySelectorAll('.markFrame').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const cp = btn.dataset.cp;
+      const t = video.currentTime.toFixed(2);
+      document.getElementById('frame-'+cp).textContent = '@ '+t+'s';
+      btn.dataset.frame = t;
+    });
+  });
+
+  checkpointsEl.querySelectorAll('.note').forEach(area=>{
+    area.addEventListener('input', ()=>{ notes[area.dataset.cp] = area.value; });
+  });
+}
+
+document.getElementById('generateReport').addEventListener('click', ()=>{
+  const flagged = checkpointData.filter(cp => ratings[cp.id] === 'bad');
+  const good = checkpointData.filter(cp => ratings[cp.id] === 'good');
+  const unrated = checkpointData.filter(cp => !ratings[cp.id]);
+
+  let html = '';
+
+  if(flagged.length === 0 && good.length === 0){
+    html += `<div class="report-block"><p class="empty-note">Score at least one checkpoint as "Looks Good" or "Needs Work" above to build a correction plan.</p></div>`;
+  } else {
+    html += `<div class="report-block"><h3>Priority Fixes (work top to bottom)</h3>`;
+    if(flagged.length === 0){
+      html += `<p class="empty-note">Nothing flagged — form looks solid across the board on the checkpoints reviewed. Focus next session on speed/power work rather than mechanics.</p>`;
+    } else {
+      flagged.forEach((cp,i)=>{
+        const note = notes[cp.id] ? ` <em>(Note: ${escapeHtml(notes[cp.id])})</em>` : '';
+        const frameBtn = checkpointsEl.querySelector(`.markFrame[data-cp="${cp.id}"]`);
+        const frameTag = frameBtn && frameBtn.dataset.frame ? ` — flagged at ${frameBtn.dataset.frame}s` : '';
+        let drillsHtml = '';
+        if(cp.linkedDrills && cp.linkedDrills.length){
+          drillsHtml = `<div class="linked-drills">` + cp.linkedDrills.map(d=>
+            `<div class="drill-tag"><span class="drill-name">${d.name}</span><span class="drill-app">${d.app}</span><span class="drill-note">${d.note}</span></div>`
+          ).join('') + `</div>`;
+        }
+        html += `<div class="priority-item"><div class="priority-num">${i+1}</div><div><strong>${cp.name}</strong>${frameTag}: ${cp.bad.title}. ${cp.bad.fix}${note}${drillsHtml}</div></div>`;
+      });
+    }
+    html += `</div>`;
+
+    if(good.length){
+      html += `<div class="report-block"><h3>Holding Up Well</h3>`;
+      good.forEach(cp=>{
+        html += `<div class="priority-item"><div class="priority-num" style="color:var(--green)">✓</div><div><strong>${cp.name}</strong>: ${cp.good}</div></div>`;
+      });
+      html += `</div>`;
+    }
+
+    if(unrated.length){
+      html += `<div class="report-block"><h3>Not Yet Reviewed</h3>`;
+      html += `<p class="empty-note">${unrated.map(cp=>cp.name).join(', ')} — replay those sections and score them for a fuller picture.</p>`;
+      html += `</div>`;
+    }
+  }
+
+  reportEl.innerHTML = html;
+  document.getElementById('report-section').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('resetAll').addEventListener('click', ()=>{
+  Object.keys(ratings).forEach(k=>delete ratings[k]);
+  Object.keys(notes).forEach(k=>delete notes[k]);
+  buildCheckpoints();
+  reportEl.innerHTML = '';
+});
+
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Register service worker for PWA install
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

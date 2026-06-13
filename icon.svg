@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1A1D21"/>
+  <!-- lane lines -->
+  <g stroke="#F2F0EB" stroke-opacity="0.08" stroke-width="6">
+    <line x1="96" y1="0" x2="96" y2="512"/>
+    <line x1="200" y1="0" x2="200" y2="512"/>
+    <line x1="312" y1="0" x2="312" y2="512"/>
+    <line x1="416" y1="0" x2="416" y2="512"/>
+  </g>
+  <!-- red baseline -->
+  <rect x="0" y="392" width="512" height="10" fill="#D7402A"/>
+  <!-- sprinter silhouette -->
+  <g fill="#F2F0EB">
+    <path d="M150 392
+             L186 392
+             L210 318
+             L256 300
+             L268 250
+             L240 196
+             L262 178
+             L300 200
+             L318 252
+             L292 300
+             L320 392
+             L356 392
+             L322 268
+             L348 200
+             L388 168
+             L372 138
+             L322 168
+             L286 150
+             L226 168
+             L208 232
+             L236 296
+             L196 314
+             Z"/>
+    <circle cx="338" cy="118" r="22"/>
+  </g>
+  <!-- check mark accent -->
+  <path d="M392 320 L420 348 L470 290" fill="none" stroke="#5FE3A1" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
