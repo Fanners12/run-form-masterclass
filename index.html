@@ -128,6 +128,17 @@
   .checkpoint-name{font-family:'Oswald',sans-serif; font-weight:600; font-size:14px; letter-spacing:.04em;}
   .checkpoint-frame{font-size:11px; color:var(--chalk-dim); font-family:'Oswald',sans-serif; letter-spacing:.08em;}
   .checkpoint-desc{font-size:12px; color:var(--chalk-dim); margin:6px 0 10px; line-height:1.5;}
+  .ref-diagram{
+    background:rgba(0,0,0,0.25); border:1px solid rgba(242,240,235,0.08);
+    border-radius:3px; padding:8px; margin-bottom:10px;
+    display:flex; justify-content:center;
+  }
+  .ref-diagram svg{max-width:220px; width:100%; height:auto;}
+  .ref-caption{
+    font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--chalk-dim); text-align:center;
+    margin-top:4px;
+  }
   .rating-row{display:flex; gap:6px;}
   .rating-row button{
     flex:1; font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:.1em;
@@ -252,6 +263,7 @@
     <div class="report" id="report"></div>
     <div class="filmstrip-controls" style="margin-top:14px;">
       <button class="btn primary" id="generateReport">Generate Plan</button>
+      <button class="btn" id="exportReport" disabled>Export Plan</button>
       <button class="btn" id="resetAll">Reset</button>
     </div>
   </section>
@@ -268,6 +280,22 @@ const checkpointData = [
     id:'posture',
     name:'Posture & Lean',
     desc:'At top speed, look for a slight forward lean from the ankles (not the waist) and a tall, relaxed torso — not hunched or backward-leaning.',
+    diagram:`<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="200" x2="180" y2="200" stroke="#D7402A" stroke-width="2"/>
+      <line x1="100" y1="200" x2="100" y2="20" stroke="#F2F0EB" stroke-width="0.5" stroke-dasharray="3,3" opacity="0.4"/>
+      <g stroke="#F2F0EB" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="100" y1="200" x2="118" y2="120"/>
+        <line x1="118" y1="120" x2="100" y2="50"/>
+        <circle cx="96" cy="38" r="13" fill="#F2F0EB" stroke="none"/>
+        <line x1="118" y1="120" x2="90" y2="95"/>
+        <line x1="90" y1="95" x2="105" y2="70"/>
+        <line x1="118" y1="120" x2="145" y2="135"/>
+        <line x1="145" y1="135" x2="135" y2="160"/>
+      </g>
+      <path d="M100 200 L100 60" stroke="#5FE3A1" stroke-width="1.5" stroke-dasharray="4,3" fill="none"/>
+      <text x="106" y="135" fill="#5FE3A1" font-family="Oswald" font-size="13" font-weight="600">~5-8°</text>
+      <text x="100" y="214" fill="#9B9D9F" font-family="Oswald" font-size="10" text-anchor="middle">ANKLE</text>
+    </svg>`,
     good:'Tall posture, slight forward lean from ankles, relaxed shoulders.',
     bad:{
       title:'Posture breakdown',
@@ -282,6 +310,29 @@ const checkpointData = [
     id:'armdrive',
     name:'Arm Drive',
     desc:'Arms should drive front-to-back from the shoulder, roughly 90° elbow bend, hands moving hip-to-cheek — not crossing the body or flailing wide.',
+    diagram:`<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="200" x2="180" y2="200" stroke="#D7402A" stroke-width="2"/>
+      <g stroke="#F2F0EB" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="100" y1="200" x2="112" y2="120"/>
+        <line x1="112" y1="120" x2="100" y2="50"/>
+        <circle cx="98" cy="38" r="13" fill="#F2F0EB" stroke="none"/>
+        <!-- front arm: shoulder to elbow to hand near cheek -->
+        <line x1="112" y1="75" x2="145" y2="95"/>
+        <line x1="145" y1="95" x2="125" y2="55"/>
+        <!-- back arm: shoulder to elbow to hand near hip -->
+        <line x1="112" y1="75" x2="80" y2="100"/>
+        <line x1="80" y1="100" x2="100" y2="135"/>
+        <line x1="112" y1="120" x2="125" y2="180"/>
+        <line x1="112" y1="120" x2="85" y2="175"/>
+      </g>
+      <!-- elbow angle arcs -->
+      <path d="M133 90 A 18 18 0 0 1 138 75" stroke="#5FE3A1" stroke-width="1.5" fill="none"/>
+      <text x="148" y="78" fill="#5FE3A1" font-family="Oswald" font-size="12" font-weight="600">~90°</text>
+      <path d="M88 105 A 18 18 0 0 0 92 120" stroke="#5FE3A1" stroke-width="1.5" fill="none"/>
+      <text x="55" y="125" fill="#5FE3A1" font-family="Oswald" font-size="12" font-weight="600">~90°</text>
+      <text x="125" y="50" fill="#9B9D9F" font-family="Oswald" font-size="10">CHEEK</text>
+      <text x="95" y="148" fill="#9B9D9F" font-family="Oswald" font-size="10">HIP</text>
+    </svg>`,
     good:'Compact 90° arm swing, front-to-back, hands hip-to-cheek.',
     bad:{
       title:'Inefficient arm action',
@@ -296,6 +347,28 @@ const checkpointData = [
     id:'kneedrive',
     name:'Knee Drive (Front Side)',
     desc:'The lead knee should drive forward and up with the thigh reaching roughly parallel to the ground during max speed, foot staying under or slightly ahead of the hip.',
+    diagram:`<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="200" x2="180" y2="200" stroke="#D7402A" stroke-width="2"/>
+      <g stroke="#F2F0EB" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <!-- torso -->
+        <line x1="95" y1="180" x2="105" y2="100"/>
+        <line x1="105" y1="100" x2="92" y2="40"/>
+        <circle cx="90" cy="28" r="13" fill="#F2F0EB" stroke="none"/>
+        <!-- arms simple -->
+        <line x1="105" y1="110" x2="135" y2="125"/>
+        <line x1="105" y1="110" x2="75" y2="95"/>
+        <!-- support leg -->
+        <line x1="95" y1="180" x2="80" y2="200"/>
+        <!-- lead leg: hip to knee (driven up/fwd) to shin to foot -->
+        <line x1="95" y1="180" x2="145" y2="155"/>
+        <line x1="145" y1="155" x2="135" y2="195"/>
+      </g>
+      <!-- horizontal ref line at hip -->
+      <line x1="95" y1="180" x2="170" y2="180" stroke="#5FE3A1" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="95" y1="180" x2="145" y2="155" stroke="#5FE3A1" stroke-width="1.5"/>
+      <text x="148" y="172" fill="#5FE3A1" font-family="Oswald" font-size="12" font-weight="600">~parallel</text>
+      <text x="60" y="215" fill="#9B9D9F" font-family="Oswald" font-size="10">FOOT UNDER HIP</text>
+    </svg>`,
     good:'Strong knee lift, thigh near-parallel, foot recovers under the hip.',
     bad:{
       title:'Low / lazy knee drive',
@@ -310,6 +383,25 @@ const checkpointData = [
     id:'footstrike',
     name:'Foot Strike & Ground Contact',
     desc:'Foot should land under the hip on the ball of the foot/midfoot with a quick "stiff spring" contact — not a long overstride heel-strike out in front of the body.',
+    diagram:`<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="200" x2="180" y2="200" stroke="#D7402A" stroke-width="2"/>
+      <g stroke="#F2F0EB" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="105" y1="195" x2="112" y2="110"/>
+        <line x1="112" y1="110" x2="100" y2="45"/>
+        <circle cx="98" cy="33" r="13" fill="#F2F0EB" stroke="none"/>
+        <line x1="112" y1="115" x2="140" y2="130"/>
+        <line x1="112" y1="115" x2="85" y2="100"/>
+        <!-- trail leg -->
+        <line x1="105" y1="195" x2="135" y2="165"/>
+        <!-- landing leg straight-ish under hip, midfoot contact -->
+        <line x1="105" y1="195" x2="108" y2="195"/>
+      </g>
+      <!-- vertical drop from hip -->
+      <line x1="105" y1="195" x2="105" y2="80" stroke="#5FE3A1" stroke-width="1" stroke-dasharray="3,3"/>
+      <!-- foot contact marker -->
+      <ellipse cx="106" cy="198" rx="14" ry="4" fill="none" stroke="#5FE3A1" stroke-width="2"/>
+      <text x="118" y="200" fill="#5FE3A1" font-family="Oswald" font-size="11" font-weight="600">midfoot, under hip</text>
+    </svg>`,
     good:'Midfoot strike under the hip, short ground contact, springy rebound.',
     bad:{
       title:'Overstriding / heel strike',
@@ -324,6 +416,30 @@ const checkpointData = [
     id:'cadence',
     name:'Stride Rhythm & Cadence',
     desc:'Watch for an even, rhythmic stride pattern with consistent ground contact time on both sides — no noticeable hitch, hop, or asymmetry between legs.',
+    diagram:`<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="10" y1="190" x2="190" y2="190" stroke="#D7402A" stroke-width="2"/>
+      <!-- left figure (mid-stride) -->
+      <g stroke="#F2F0EB" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+        <line x1="50" y1="185" x2="55" y2="120"/>
+        <line x1="55" y1="120" x2="48" y2="60"/>
+        <circle cx="47" cy="50" r="9" fill="#F2F0EB" stroke="none"/>
+        <line x1="55" y1="125" x2="35" y2="155"/>
+        <line x1="55" y1="125" x2="75" y2="135"/>
+      </g>
+      <!-- right figure (mirrored, same phase) -->
+      <g stroke="#F2F0EB" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85">
+        <line x1="150" y1="185" x2="145" y2="120"/>
+        <line x1="145" y1="120" x2="152" y2="60"/>
+        <circle cx="153" cy="50" r="9" fill="#F2F0EB" stroke="none"/>
+        <line x1="145" y1="125" x2="165" y2="155"/>
+        <line x1="145" y1="125" x2="125" y2="135"/>
+      </g>
+      <!-- symmetry line -->
+      <line x1="100" y1="20" x2="100" y2="190" stroke="#5FE3A1" stroke-width="1" stroke-dasharray="2,4"/>
+      <text x="100" y="35" fill="#5FE3A1" font-family="Oswald" font-size="11" font-weight="600" text-anchor="middle">mirror symmetry</text>
+      <text x="50" y="210" fill="#9B9D9F" font-family="Oswald" font-size="10" text-anchor="middle">LEFT</text>
+      <text x="150" y="210" fill="#9B9D9F" font-family="Oswald" font-size="10" text-anchor="middle">RIGHT</text>
+    </svg>`,
     good:'Even rhythm, symmetrical stride length and contact time both sides.',
     bad:{
       title:'Asymmetric / uneven rhythm',
@@ -338,6 +454,24 @@ const checkpointData = [
     id:'headstability',
     name:'Head & Gaze Stability',
     desc:'Head should stay level and stable, eyes looking ahead toward the horizon — not bobbing, tilting back, or looking down at the feet.',
+    diagram:`<svg viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="200" x2="180" y2="200" stroke="#D7402A" stroke-width="2"/>
+      <g stroke="#F2F0EB" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="100" y1="200" x2="105" y2="115"/>
+        <line x1="105" y1="115" x2="98" y2="50"/>
+        <circle cx="96" cy="38" r="13" fill="#F2F0EB" stroke="none"/>
+        <line x1="105" y1="125" x2="80" y2="150"/>
+        <line x1="105" y1="125" x2="130" y2="110"/>
+        <line x1="100" y1="200" x2="115" y2="170"/>
+        <line x1="100" y1="200" x2="85" y2="175"/>
+      </g>
+      <!-- horizon eyeline -->
+      <line x1="96" y1="38" x2="170" y2="38" stroke="#5FE3A1" stroke-width="1.5" stroke-dasharray="3,3"/>
+      <text x="172" y="42" fill="#5FE3A1" font-family="Oswald" font-size="11" font-weight="600">horizon</text>
+      <!-- level head box -->
+      <rect x="83" y="25" width="26" height="26" fill="none" stroke="#5FE3A1" stroke-width="1" stroke-dasharray="2,2"/>
+      <text x="96" y="65" fill="#9B9D9F" font-family="Oswald" font-size="10" text-anchor="middle">LEVEL</text>
+    </svg>`,
     good:'Level, stable head position, eyes on the horizon.',
     bad:{
       title:'Head bobbing / looking down',
@@ -459,6 +593,8 @@ function buildCheckpoints(){
         <div class="checkpoint-name">${cp.name}</div>
         <div class="checkpoint-frame" id="frame-${cp.id}"></div>
       </div>
+      <div class="ref-diagram">${cp.diagram}</div>
+      <div class="ref-caption">Target form &amp; angles</div>
       <div class="checkpoint-desc">${cp.desc}</div>
       <div class="rating-row">
         <button data-rate="good" data-cp="${cp.id}">Looks Good</button>
@@ -546,7 +682,57 @@ document.getElementById('generateReport').addEventListener('click', ()=>{
   }
 
   reportEl.innerHTML = html;
+  document.getElementById('exportReport').disabled = false;
   document.getElementById('report-section').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('exportReport').addEventListener('click', ()=>{
+  const date = new Date().toLocaleDateString();
+  let text = `RUN FORM MASTERCLASS — CORRECTION PLAN\nDate: ${date}\n`;
+  text += `${'='.repeat(40)}\n\n`;
+
+  const flagged = checkpointData.filter(cp => ratings[cp.id] === 'bad');
+  const good = checkpointData.filter(cp => ratings[cp.id] === 'good');
+  const unrated = checkpointData.filter(cp => !ratings[cp.id]);
+
+  text += `PRIORITY FIXES\n${'-'.repeat(40)}\n`;
+  if(flagged.length === 0){
+    text += `Nothing flagged — form looks solid. Focus next session on speed/power work.\n`;
+  } else {
+    flagged.forEach((cp,i)=>{
+      const frameBtn = checkpointsEl.querySelector(`.markFrame[data-cp="${cp.id}"]`);
+      const frameTag = frameBtn && frameBtn.dataset.frame ? ` (flagged at ${frameBtn.dataset.frame}s)` : '';
+      text += `\n${i+1}. ${cp.name}${frameTag}: ${cp.bad.title}\n   Fix: ${cp.bad.fix}\n`;
+      if(notes[cp.id]) text += `   Note: ${notes[cp.id]}\n`;
+      if(cp.linkedDrills){
+        cp.linkedDrills.forEach(d=>{
+          text += `   Drill: ${d.name} — ${d.app} (${d.note})\n`;
+        });
+      }
+    });
+  }
+
+  if(good.length){
+    text += `\n\nHOLDING UP WELL\n${'-'.repeat(40)}\n`;
+    good.forEach(cp=>{
+      text += `- ${cp.name}: ${cp.good}\n`;
+    });
+  }
+
+  if(unrated.length){
+    text += `\n\nNOT YET REVIEWED\n${'-'.repeat(40)}\n`;
+    text += unrated.map(cp=>cp.name).join(', ') + '\n';
+  }
+
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `run-form-plan-${date.replace(/\//g,'-')}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 });
 
 document.getElementById('resetAll').addEventListener('click', ()=>{
@@ -554,6 +740,7 @@ document.getElementById('resetAll').addEventListener('click', ()=>{
   Object.keys(notes).forEach(k=>delete notes[k]);
   buildCheckpoints();
   reportEl.innerHTML = '';
+  document.getElementById('exportReport').disabled = true;
 });
 
 function escapeHtml(s){
